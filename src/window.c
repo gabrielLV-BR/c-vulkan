@@ -14,6 +14,9 @@ bool window_init(window *window, uint width, uint height, const char *title) {
         return false;
     }
     
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
     window->handle = glfwCreateWindow(width, height, title, NULL, NULL);
 
     if (window->handle == NULL) {
@@ -26,6 +29,7 @@ bool window_init(window *window, uint width, uint height, const char *title) {
 
 void window_destroy(window *window) {
     glfwDestroyWindow(window->handle);
+    glfwTerminate();
 }
 
 bool window_running(window *window) {
@@ -35,4 +39,8 @@ bool window_running(window *window) {
 void window_update(window *window) {
     glfwPollEvents();
     glfwSwapBuffers(window->handle);
+}
+
+const char** window_get_required_extensions(uint *count) {
+    return glfwGetRequiredInstanceExtensions(count);
 }
