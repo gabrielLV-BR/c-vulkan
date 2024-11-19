@@ -5,7 +5,7 @@
 
 #ifndef NDEBUG
 
-#define ERROR(x) fprintf(stderr, "(ERROR) at %s:%d -> %s", __FILE__, __LINE__, (x))
+#define ERROR(x) (fprintf(stderr, "(ERROR) at %s:%d -> %s", __FILE__, __LINE__, (x)) , 0)
 #define INFO(x)  printf("(LOG) %s", (x))
 
 #else

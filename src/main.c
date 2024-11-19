@@ -1,25 +1,31 @@
 #include <stdio.h>
 
+#include "renderer/renderer.h"
 #include "window.h"
 #include "log.h"
 
+#define FAULT 1
+#define OK 0
+
 int main() {
-	window window = (struct window_t) {
-		.width = 500,
-		.height = 500,
-		.title = "Hello"
-	};
+	window *window;
+	renderer *renderer;
 
-	if (!window_init(&window)) {
+	if (!window_init(window, 500, 500, "Hello")) {
 		ERROR("Error initializing window");
-		return 1;
+		return FAULT;
 	}
 
-	while (window_running(&window)) {
-		window_update(&window);
+	if (!renderer_init(window, renderer)) {
+		ERROR("Error initializing renderer");
+		return FAULT;
 	}
 
-	window_destroy(&window);
+	while (window_running(window)) {
+		window_update(window);
+	}
 
-	return 0;
+	window_destroy(window);
+
+	return OK;
 }

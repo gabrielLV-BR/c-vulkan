@@ -12,6 +12,14 @@ add_subdirectory(modules/glfw)
 add_executable(
 	${PROJECT_NAME}
 	src/main.c
+	src/window.c
+
+	src/renderer/renderer.c
+
+	src/renderer/backend/vulkan_backend.c
+	src/renderer/backend/vulkan_command_buffer.c
+	src/renderer/backend/vulkan_utils.c
+
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)

@@ -2,13 +2,19 @@
 #include "log.h"
 #include "types.h"
 
-bool window_init(window *window) {
+struct window_t {
+    GLFWwindow *handle;
+    const char *title;
+    uint width, height;
+};
+
+bool window_init(window *window, uint width, uint height, const char *title) {
     if (!glfwInit()) {
         ERROR("Error initializing GLFW");
         return false;
     }
-
-    window->handle = glfwCreateWindow(window->width, window->height, window->title, NULL, NULL);
+    
+    window->handle = glfwCreateWindow(width, height, title, NULL, NULL);
 
     if (window->handle == NULL) {
         ERROR("Error creating window");
