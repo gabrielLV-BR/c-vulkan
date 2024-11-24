@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "window.h"
 #include "log.h"
 #include "types.h"
@@ -7,6 +9,10 @@ struct window_t {
     const char *title;
     uint width, height;
 };
+
+window* window_new() {
+    return malloc(sizeof(window));
+}
 
 bool window_init(window *window, uint width, uint height, const char *title) {
     if (!glfwInit()) {

@@ -6,7 +6,9 @@
 
 typedef struct renderer_t renderer;
 
-int renderer_init(window *window, renderer *renderer);
+renderer* renderer_new();
+
+bool renderer_init(window *window, renderer *renderer);
 
 void renderer_destroy(renderer *renderer);
 

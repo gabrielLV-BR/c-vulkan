@@ -8,10 +8,12 @@
 #define OK 0
 
 int main() {
-	window *window;
-	renderer *renderer;
+	window *window = window_new();
+	renderer *renderer = renderer_new();
 
-	if (!window_init(window, 500, 500, "Hello")) {
+	INFO("HI");
+
+	if (!window_init(window, 500, 500, "Hello\0")) {
 		ERROR("Error initializing window");
 		return FAULT;
 	}

@@ -4,15 +4,20 @@ project(mygame VERSION 1.0)
 
 set (C_STANDARD 99)
 
+# temp
 set(GLFW_BUILD_WAYLAND 1)
 set(GLFW_BUILD_X11 0)
 
 add_subdirectory(modules/glfw)
 
+find_package(Vulkan REQUIRED)
+
 add_executable(
 	${PROJECT_NAME}
 	src/main.c
 	src/window.c
+
+	src/structs/slice.c
 
 	src/renderer/renderer.c
 
@@ -22,7 +27,7 @@ add_executable(
 
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw Vulkan::Vulkan)
 target_include_directories(
 	${PROJECT_NAME} 
 	PRIVATE 

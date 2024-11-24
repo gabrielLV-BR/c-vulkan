@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "info.h"
 
 #include "window.h"
@@ -11,6 +13,10 @@
 struct vulkan_backend_t {
     VkInstance instance;
 };
+
+vulkan_backend* vulkan_backend_new() {
+    return malloc(sizeof(vulkan_backend));
+}
 
 static VkApplicationInfo _vulkan_create_application_info() {
     VkApplicationInfo application_info = {0};
@@ -28,6 +34,8 @@ static VkApplicationInfo _vulkan_create_application_info() {
     return application_info;
 }
 
+
+
 bool vulkan_backend_init(vulkan_backend *backend) {
     VkApplicationInfo application_info = _vulkan_create_application_info();
     
@@ -41,8 +49,8 @@ bool vulkan_backend_init(vulkan_backend *backend) {
 
     instance_create_info.enabledLayerCount = 0;
 
-#ifdef PLATFORM_APPLE
-    //TODO test this, I doubt it works first-try
+#if PLATFORM_APPLE
+    //TODO implement str_append
     instance_create_info.ppEnabledExtensionNames = 
         str_append(instance_create_info.ppEnabledExtensionNames, 
             VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME, 
@@ -53,12 +61,14 @@ bool vulkan_backend_init(vulkan_backend *backend) {
 #endif
 
 #ifndef NDEBUG
-    _vulkan_list_extensions();
+    _vulkan_print_extensions();
 #endif
 
     VkResult result = vkCreateInstance(&instance_create_info, NULL, &backend->instance);
 
+#if PLATFORM_APPLE
     free(instance_create_info.ppEnabledExtensionNames);
+#endif
 
     return VKASSERT(result);
 }

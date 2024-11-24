@@ -5,6 +5,8 @@
 
 typedef struct vulkan_backend_t vulkan_backend;
 
+vulkan_backend* vulkan_backend_new();
+
 bool vulkan_backend_init(vulkan_backend *backend);
 
 bool vulkan_create_device(vulkan_backend *backend);

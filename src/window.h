@@ -7,6 +7,8 @@
 
 typedef struct window_t window;
 
+window* window_new();
+
 bool window_init(window *window, uint width, uint height, const char *title);
 void window_destroy(window *window);
 
