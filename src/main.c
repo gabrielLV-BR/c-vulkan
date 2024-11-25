@@ -21,10 +21,11 @@ int main() {
 		return FAULT;
 	}
 
-	while (window_running(window)) {
+	while (window_is_open(window)) {
 		window_update(window);
 	}
 
+	renderer_destroy(renderer);
 	window_destroy(window);
 
 	return OK;

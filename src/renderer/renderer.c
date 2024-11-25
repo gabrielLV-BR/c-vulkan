@@ -18,4 +18,6 @@ bool renderer_init(window *window, renderer *renderer) {
     return vulkan_backend_init(renderer->backend); 
 }
 
-void renderer_destroy(renderer *renderer) {}
+void renderer_destroy(renderer *renderer) {
+    vulkan_backend_destroy(renderer->backend);
+}

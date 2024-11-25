@@ -38,7 +38,7 @@ void window_destroy(window *window) {
     glfwTerminate();
 }
 
-bool window_running(window *window) {
+bool window_is_open(window *window) {
     return !glfwWindowShouldClose(window->handle);
 }
 

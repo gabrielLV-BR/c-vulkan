@@ -8,7 +8,7 @@
 #include <vulkan/vulkan.h>
 
 const char *VALIDATION_LAYERS[] = { 
-    "VK_LAYER_KHRONOS_validation" 
+    "VK_LAYER_KHRONOS_validation"
 };
 const int VALIDATION_LAYERS_COUNT = 1;
 
@@ -38,7 +38,7 @@ bool __vulkan_check_validation_layer_support(uint layer_count, VkLayerProperties
 
         return false;
 NEXT:
-        DEBUG("Adding validation layer %s", VALIDATION_LAYERS[i]);
+        DEBUG("Adding validation layer %s\n", VALIDATION_LAYERS[i]);
     }
 
     return true;
@@ -67,3 +67,75 @@ bool _vulkan_add_validation_layers(VkInstanceCreateInfo *instance_create_info) {
     return true;
 }
 
+bool _vulkan_add_debug_messaging_extension(VkInstanceCreateInfo *instance_create_info) {
+    int i;
+    int debug_layer_name_length = strlen(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    char **extensions = calloc(instance_create_info->enabledExtensionCount + 1, sizeof(char *));
+
+    // copy existing layers
+    for (i = 0; i < instance_create_info->enabledExtensionCount; i++) {
+        int extension_name_length = strlen(instance_create_info->ppEnabledExtensionNames[i]);
+
+        extensions[i] = calloc(extension_name_length, sizeof (char));
+
+        strcpy(extensions[i], instance_create_info->ppEnabledExtensionNames[i]);
+    }
+
+    // add new layer
+
+    extensions[i] = calloc(debug_layer_name_length, sizeof (char));
+
+    strcpy(extensions[i], VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+
+    return true;
+}
+
+// debug callback
+bool _vulkan_create_debug_utils_messenger(
+    VkInstance instance, 
+    VkDebugUtilsMessengerCreateInfoEXT *create_info,
+    VkAllocationCallbacks *allocator, 
+    VkDebugUtilsMessengerEXT *debug_messenger
+) {
+    PFN_vkCreateDebugUtilsMessengerEXT pf_vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)
+        vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+
+    if (pf_vkCreateDebugUtilsMessengerEXT == NULL) {
+        ERROR("Error loading vkCreateDebugUtilsMessengerEXT function");
+        return false;
+    }
+
+    return VKASSERT(pf_vkCreateDebugUtilsMessengerEXT(instance, create_info, NULL, debug_messenger));
+}
+
+bool _vulkan_destroy_debug_utils_messenger(
+    VkInstance instance, 
+    VkDebugUtilsMessengerEXT debug_messenger,
+    VkAllocationCallbacks *allocator
+) {
+    PFN_vkDestroyDebugUtilsMessengerEXT fn_vkDestroyDebugUtilsMessengerEXT =  
+        vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+
+    if (fn_vkDestroyDebugUtilsMessengerEXT == NULL) {
+        ERROR("Error loading vkDestroyDebugUtilsMessengerEXT function");
+        return false;
+    }
+
+    fn_vkDestroyDebugUtilsMessengerEXT(instance, debug_messenger, allocator);
+
+    return true;
+}
+
+
+VKAPI_ATTR VkBool32 VKAPI_CALL _vulkan_debug_callback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
+    VkDebugUtilsMessageTypeFlagsEXT message_type,
+    const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
+    void* user_data
+) {
+    if (message_severity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+        fprintf(stderr, callback_data->pMessage);
+    }
+
+    return VK_FALSE;
+}

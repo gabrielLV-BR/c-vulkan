@@ -9,8 +9,6 @@ vulkan_backend* vulkan_backend_new();
 
 bool vulkan_backend_init(vulkan_backend *backend);
 
-bool vulkan_create_device(vulkan_backend *backend);
-bool vulkan_create_swapchain(vulkan_backend *backend);
 /* TODO add in more initialization functions */
 
 void vulkan_backend_destroy(vulkan_backend *backend);
