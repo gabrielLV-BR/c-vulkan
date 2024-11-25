@@ -11,9 +11,7 @@ int main() {
 	window *window = window_new();
 	renderer *renderer = renderer_new();
 
-	INFO("HI");
-
-	if (!window_init(window, 500, 500, "Hello\0")) {
+	if (!window_init(window, 500, 500, "Hello")) {
 		ERROR("Error initializing window");
 		return FAULT;
 	}

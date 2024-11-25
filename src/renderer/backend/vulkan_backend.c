@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #include "info.h"
-
+#include "log.h"
 #include "window.h"
 #include "structs/slice.h"
 
@@ -35,8 +35,7 @@ static VkApplicationInfo _vulkan_create_application_info() {
 }
 
 
-
-bool vulkan_backend_init(vulkan_backend *backend) {
+bool __vulkan_backend_create_instance(VkInstance *instance) {
     VkApplicationInfo application_info = _vulkan_create_application_info();
     
     VkInstanceCreateInfo instance_create_info = {0};
@@ -46,8 +45,15 @@ bool vulkan_backend_init(vulkan_backend *backend) {
     uint enabled_extension_count;
     instance_create_info.ppEnabledExtensionNames = window_get_required_extensions(&enabled_extension_count);
     instance_create_info.enabledExtensionCount = enabled_extension_count;
-
+    
     instance_create_info.enabledLayerCount = 0;
+
+#ifndef NDEBUG
+    if (!_vulkan_add_validation_layers(&instance_create_info)) {
+        ERROR("Error adding Vulkan validation layers");
+        return false;
+    }
+#endif
 
 #if PLATFORM_APPLE
     //TODO implement str_append
@@ -63,14 +69,24 @@ bool vulkan_backend_init(vulkan_backend *backend) {
 #ifndef NDEBUG
     _vulkan_print_extensions();
 #endif
-
-    VkResult result = vkCreateInstance(&instance_create_info, NULL, &backend->instance);
+    
+    VkResult result = vkCreateInstance(&instance_create_info, NULL, instance);
 
 #if PLATFORM_APPLE
     free(instance_create_info.ppEnabledExtensionNames);
 #endif
 
     return VKASSERT(result);
+}
+
+
+bool vulkan_backend_init(vulkan_backend *backend) {
+    if (!__vulkan_backend_create_instance(&backend->instance)) {
+        ERROR("Error creating Vulkan instance");
+        return false;
+    }
+
+    return true;
 }
 
 void vulkan_backend_destroy(vulkan_backend *backend) {
