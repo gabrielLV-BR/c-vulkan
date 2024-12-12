@@ -90,6 +90,27 @@ bool _vulkan_add_debug_messaging_extension(VkInstanceCreateInfo *instance_create
     return true;
 }
 
+
+int _vulkan_get_physical_device_suitability_score(VkPhysicalDevice physical_device) {
+    int score = 0;
+
+    VkPhysicalDeviceProperties properties;
+    VkPhysicalDeviceFeatures features;
+
+    vkGetPhysicalDeviceProperties(physical_device, &properties);
+    vkGetPhysicalDeviceFeatures(physical_device, &features);
+
+    // optional, but great :D
+    score += (VK_VERSION_MINOR(properties.apiVersion) == 3) * 5;
+    score += (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) * 10;
+
+    // required
+    score = score && VK_VERSION_MINOR(properties.apiVersion) >= 2;
+    score = score && features.geometryShader;
+
+    return score;
+}
+
 // debug callback
 bool _vulkan_create_debug_utils_messenger(
     VkInstance instance, 

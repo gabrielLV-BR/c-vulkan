@@ -26,6 +26,10 @@ bool _vulkan_destroy_debug_utils_messenger(
     VkAllocationCallbacks *allocator
 );
 
+int _vulkan_get_physical_device_suitability_score(
+    VkPhysicalDevice physical_device
+);
+
 VKAPI_ATTR VkBool32 VKAPI_CALL _vulkan_debug_callback(
     VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
     VkDebugUtilsMessageTypeFlagsEXT message_type,
