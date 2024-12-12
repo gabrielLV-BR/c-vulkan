@@ -90,15 +90,45 @@ bool _vulkan_add_debug_messaging_extension(VkInstanceCreateInfo *instance_create
     return true;
 }
 
+int _vulkan_physical_device_find_suitable_queue_family_index(
+    VkPhysicalDevice physical_device, 
+    VkQueueFlagBits queue_flag_bit
+) {
+    int i;
+    uint queue_family_count;
+    VkQueueFamilyProperties *queue_families;
+
+    vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, NULL);
+
+    queue_families = calloc(queue_family_count, sizeof(VkQueueFamilyProperties));
+
+    vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, queue_families);
+
+    for (i = 0; i < queue_family_count; i++) {
+        if (queue_families[i].queueFlags & queue_flag_bit) {
+            return i;
+        }
+    }
+
+    INFO("No suitable queue family was found for provided flag");
+    return -1;
+}
 
 int _vulkan_get_physical_device_suitability_score(VkPhysicalDevice physical_device) {
     int score = 0;
+    int graphics_family_index;
 
     VkPhysicalDeviceProperties properties;
     VkPhysicalDeviceFeatures features;
 
     vkGetPhysicalDeviceProperties(physical_device, &properties);
     vkGetPhysicalDeviceFeatures(physical_device, &features);
+
+    graphics_family_index = 
+        _vulkan_physical_device_find_suitable_queue_family_index(
+            physical_device,
+            VK_QUEUE_GRAPHICS_BIT
+        );
 
     // optional, but great :D
     score += (VK_VERSION_MINOR(properties.apiVersion) == 3) * 5;
@@ -107,6 +137,8 @@ int _vulkan_get_physical_device_suitability_score(VkPhysicalDevice physical_devi
     // required
     score = score && VK_VERSION_MINOR(properties.apiVersion) >= 2;
     score = score && features.geometryShader;
+
+    score = score && (graphics_family_index != -1);
 
     return score;
 }
@@ -121,6 +153,7 @@ bool _vulkan_create_debug_utils_messenger(
     PFN_vkCreateDebugUtilsMessengerEXT pf_vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)
         vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
 
+    //TODO this is erroring: fix it!
     if (pf_vkCreateDebugUtilsMessengerEXT == NULL) {
         ERROR("Error loading vkCreateDebugUtilsMessengerEXT function");
         return false;
