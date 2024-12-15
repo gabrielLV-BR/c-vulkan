@@ -10,7 +10,7 @@
 extern const char *VALIDATION_LAYERS[];
 extern const int VALIDATION_LAYERS_COUNT;
 
-extern const VkQueueFlagBits *QUEUE_FAMILIES[];
+extern const VkQueueFlagBits QUEUE_FAMILIES[];
 extern const int QUEUE_FAMILIES_COUNT;
 
 void _vulkan_print_extensions();

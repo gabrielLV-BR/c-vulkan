@@ -50,7 +50,7 @@ void window_update(window *window) {
     glfwSwapBuffers(window->handle);
 }
 
-const char** window_get_required_extensions(uint *count) {
+char** window_get_required_extensions(uint *count) {
     const char **extensions = glfwGetRequiredInstanceExtensions(count);
 
     return str_to_owned(extensions, (int) *count);

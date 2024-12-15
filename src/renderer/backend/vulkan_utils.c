@@ -15,7 +15,7 @@ const char *VALIDATION_LAYERS[] = {
 };
 const int VALIDATION_LAYERS_COUNT = 1;
 
-const VkQueueFlagBits *QUEUE_FAMILIES[] = {
+const VkQueueFlagBits QUEUE_FAMILIES[] = {
     VK_QUEUE_GRAPHICS_BIT
 };
 const int QUEUE_FAMILIES_COUNT = 1;
@@ -70,7 +70,7 @@ const char** _vulkan_list_required_validation_layers(int *validation_layers_coun
 }
 
 const char** _vulkan_list_required_extensions(int *extensions_count) {
-    const char **extensions = window_get_required_extensions(extensions_count);
+    char **extensions = window_get_required_extensions(extensions_count);
 
     extensions = str_to_owned(extensions, *extensions_count);
 

@@ -15,6 +15,6 @@ void window_destroy(window *window);
 bool window_is_open(window *window);
 void window_update(window *window);
 
-const char** window_get_required_extensions(uint *count);
+char** window_get_required_extensions(uint *count);
 
 #endif // __window_h__
