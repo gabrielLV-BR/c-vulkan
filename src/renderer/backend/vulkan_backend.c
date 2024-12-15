@@ -3,7 +3,7 @@
 #include "info.h"
 #include "log.h"
 #include "window.h"
-#include "structs/slice.h"
+#include "utils/strings.h"
 
 #include "vulkan_backend.h"
 #include "vulkan_utils.h"
@@ -74,17 +74,14 @@ bool __vulkan_backend_create_instance(VkInstance *instance) {
         return false;
     }
 
-    if (!_vulkan_add_debug_messaging_extension(&instance_create_info)) {
-        ERROR("Error adding Vulkan debug messaging extensions");
-        return false;
-    }
+    _vulkan_add_debug_messaging_extension(&instance_create_info);
 #endif
 
 #if PLATFORM_APPLE
     //TODO implement str_append
     instance_create_info.ppEnabledExtensionNames = 
-        str_append(instance_create_info.ppEnabledExtensionNames, 
-            VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME, 
+        str_append(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME, 
+            instance_create_info.ppEnabledExtensionNames, 
             instance_create_info.enabledExtensionCount);
 
     instance_create_info.enabledExtensionCount += 1;
@@ -97,9 +94,12 @@ bool __vulkan_backend_create_instance(VkInstance *instance) {
     
     VkResult result = vkCreateInstance(&instance_create_info, NULL, instance);
 
-#if PLATFORM_APPLE
-    free(instance_create_info.ppEnabledExtensionNames);
-#endif
+    // cleanup
+    str_free_all(
+        instance_create_info.ppEnabledExtensionNames, 
+        instance_create_info.enabledExtensionCount);
+
+    //
 
     return VKASSERT(result);
 }
@@ -132,6 +132,8 @@ bool __vulkan_backend_find_physical_device(
         }
     }
 
+    free(physical_devices);
+
     if (!most_suitable_device_score) {
         ERROR("No sufficiently suitable device found");
         return false;
@@ -153,7 +155,7 @@ bool vulkan_backend_init(vulkan_backend *backend) {
     }
 #endif
 
-    if (__vulkan_backend_find_physical_device(backend->instance, &backend->physical_device)) {
+    if (!__vulkan_backend_find_physical_device(backend->instance, &backend->physical_device)) {
         ERROR("Error finding physical devices");
         return false;
     }

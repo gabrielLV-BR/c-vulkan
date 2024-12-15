@@ -4,6 +4,8 @@
 #include "log.h"
 #include "types.h"
 
+#include "utils/strings.h"
+
 struct window_t {
     GLFWwindow *handle;
     const char *title;
@@ -36,6 +38,7 @@ bool window_init(window *window, uint width, uint height, const char *title) {
 void window_destroy(window *window) {
     glfwDestroyWindow(window->handle);
     glfwTerminate();
+    free(window);
 }
 
 bool window_is_open(window *window) {
@@ -48,5 +51,7 @@ void window_update(window *window) {
 }
 
 const char** window_get_required_extensions(uint *count) {
-    return glfwGetRequiredInstanceExtensions(count);
+    const char **extensions = glfwGetRequiredInstanceExtensions(count);
+
+    return str_to_owned(extensions, (int) *count);
 }

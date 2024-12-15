@@ -26,6 +26,8 @@ void _vulkan_print_extensions() {
     for (i = 0; i < extension_count; i++) {
         DEBUG("Extension name: %s\n", extensions[i].extensionName);
     }
+
+    free(extensions);
 }
 
 bool __vulkan_check_validation_layer_support(uint layer_count, VkLayerProperties *available_layers) {
@@ -55,7 +57,10 @@ bool _vulkan_add_validation_layers(VkInstanceCreateInfo *instance_create_info) {
     vkEnumerateInstanceLayerProperties(&layer_count, layers);
 
     if (!__vulkan_check_validation_layer_support(layer_count, layers)) {
+        free(layers);
+
         ERROR("Requested validation layers are not supported");
+
         return false;
     }
 
@@ -64,13 +69,16 @@ bool _vulkan_add_validation_layers(VkInstanceCreateInfo *instance_create_info) {
 
     INFO("Validation layers were added succesfully");
 
+    free(layers);
+
     return true;
 }
 
-bool _vulkan_add_debug_messaging_extension(VkInstanceCreateInfo *instance_create_info) {
+void _vulkan_add_debug_messaging_extension(VkInstanceCreateInfo *instance_create_info) {
     int i;
     int debug_layer_name_length = strlen(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-    char **extensions = calloc(instance_create_info->enabledExtensionCount + 1, sizeof(char *));
+    int extension_count = instance_create_info->enabledExtensionCount + 1;
+    char **extensions = calloc(extension_count, sizeof(char *));
 
     // copy existing layers
     for (i = 0; i < instance_create_info->enabledExtensionCount; i++) {
@@ -87,7 +95,8 @@ bool _vulkan_add_debug_messaging_extension(VkInstanceCreateInfo *instance_create
 
     strcpy(extensions[i], VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
-    return true;
+    instance_create_info->ppEnabledExtensionNames = extensions;
+    instance_create_info->enabledExtensionCount = extension_count;
 }
 
 int _vulkan_physical_device_find_suitable_queue_family_index(
@@ -106,9 +115,12 @@ int _vulkan_physical_device_find_suitable_queue_family_index(
 
     for (i = 0; i < queue_family_count; i++) {
         if (queue_families[i].queueFlags & queue_flag_bit) {
+            free(queue_families);
             return i;
         }
     }
+    
+    free(queue_families);
 
     INFO("No suitable queue family was found for provided flag");
     return -1;
@@ -135,10 +147,11 @@ int _vulkan_get_physical_device_suitability_score(VkPhysicalDevice physical_devi
     score += (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) * 10;
 
     // required
-    score = score && VK_VERSION_MINOR(properties.apiVersion) >= 2;
-    score = score && features.geometryShader;
+    score *= VK_VERSION_MINOR(properties.apiVersion) >= 2;
+    score *= features.geometryShader;
+    score *= graphics_family_index != -1;
 
-    score = score && (graphics_family_index != -1);
+    DEBUG("Device %s scored %d\n", properties.deviceName, score);
 
     return score;
 }

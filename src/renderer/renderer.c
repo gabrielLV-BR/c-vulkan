@@ -20,4 +20,7 @@ bool renderer_init(window *window, renderer *renderer) {
 
 void renderer_destroy(renderer *renderer) {
     vulkan_backend_destroy(renderer->backend);
+
+    free(renderer->backend);
+    free(renderer);
 }

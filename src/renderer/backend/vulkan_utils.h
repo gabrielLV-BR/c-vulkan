@@ -10,7 +10,7 @@
 void _vulkan_print_extensions();
 
 bool _vulkan_add_validation_layers(VkInstanceCreateInfo *instance_create_info); 
-bool _vulkan_add_debug_messaging_extension(VkInstanceCreateInfo *instance_create_info);
+void _vulkan_add_debug_messaging_extension(VkInstanceCreateInfo *instance_create_info);
 
 // Vulkan debug callback
 

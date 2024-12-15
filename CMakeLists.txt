@@ -17,7 +17,7 @@ add_executable(
 	src/main.c
 	src/window.c
 
-	src/structs/slice.c
+	src/utils/strings.c
 
 	src/renderer/renderer.c
 
