@@ -16,11 +16,11 @@ char **str_to_owned(const char * const* string_arr, int count) {
 }
 
 char **str_append(const char *to_append, const char * const* string_arr, int count) {
-    const char **new_string_arr = realloc(string_arr, count + 1);
+    char **new_string_arr = realloc((void *)string_arr, sizeof (char) * (count + 1));
 
-    new_string_arr[count - 1] = calloc(sizeof (char), strlen(to_append));
+    new_string_arr[count] = calloc(sizeof (char), strlen(to_append));
 
-    strcpy(new_string_arr[count - 1], to_append);
+    strcpy(new_string_arr[count], to_append);
 
     return new_string_arr;
 }

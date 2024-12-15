@@ -4,6 +4,9 @@
 #include "log.h"
 
 #include "vulkan_utils.h"
+#include "window.h"
+
+#include "utils/strings.h"
 
 #include <vulkan/vulkan.h>
 
@@ -11,6 +14,11 @@ const char *VALIDATION_LAYERS[] = {
     "VK_LAYER_KHRONOS_validation"
 };
 const int VALIDATION_LAYERS_COUNT = 1;
+
+const VkQueueFlagBits *QUEUE_FAMILIES[] = {
+    VK_QUEUE_GRAPHICS_BIT
+};
+const int QUEUE_FAMILIES_COUNT = 1;
 
 void _vulkan_print_extensions() {
     int i;
@@ -46,7 +54,48 @@ NEXT:
     return true;
 }
 
-bool _vulkan_add_validation_layers(VkInstanceCreateInfo *instance_create_info) {
+const char** _vulkan_list_required_validation_layers(int *validation_layers_count) {
+#ifndef NDEBUG
+    if (!_vulkan_check_validation_layers()) {
+        *validation_layers_count = 0;
+        return NULL;
+    }
+
+    *validation_layers_count = VALIDATION_LAYERS_COUNT;
+    return VALIDATION_LAYERS;        
+#else
+    *validation_layers_count = 0;
+    return NULL;
+#endif
+}
+
+const char** _vulkan_list_required_extensions(int *extensions_count) {
+    const char **extensions = window_get_required_extensions(extensions_count);
+
+    extensions = str_to_owned(extensions, *extensions_count);
+
+#ifndef NDEBUG
+    extensions = str_append(
+        VK_EXT_DEBUG_UTILS_EXTENSION_NAME, 
+        extensions, 
+        *extensions_count);
+    
+    *extensions_count += 1;
+#endif
+
+#if PLATFORM_APPLE
+    extensions = str_append(
+        VK_EXT_DEBUG_UTILS_EXTENSION_NAME, 
+        extensions, 
+        *extensions_count);
+
+    *extensions_count += 1;
+#endif
+
+    return extensions;
+}
+
+bool _vulkan_check_validation_layers() {
     uint layer_count;
     VkLayerProperties *layers;
 
@@ -64,41 +113,14 @@ bool _vulkan_add_validation_layers(VkInstanceCreateInfo *instance_create_info) {
         return false;
     }
 
-    instance_create_info->ppEnabledLayerNames = VALIDATION_LAYERS;
-    instance_create_info->enabledLayerCount = VALIDATION_LAYERS_COUNT;
-
-    INFO("Validation layers were added succesfully");
-
     free(layers);
+
+    INFO("Requested validation layers are supported");
 
     return true;
 }
 
-void _vulkan_add_debug_messaging_extension(VkInstanceCreateInfo *instance_create_info) {
-    int i;
-    int debug_layer_name_length = strlen(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-    int extension_count = instance_create_info->enabledExtensionCount + 1;
-    char **extensions = calloc(extension_count, sizeof(char *));
-
-    // copy existing layers
-    for (i = 0; i < instance_create_info->enabledExtensionCount; i++) {
-        int extension_name_length = strlen(instance_create_info->ppEnabledExtensionNames[i]);
-
-        extensions[i] = calloc(extension_name_length, sizeof (char));
-
-        strcpy(extensions[i], instance_create_info->ppEnabledExtensionNames[i]);
-    }
-
-    // add new layer
-
-    extensions[i] = calloc(debug_layer_name_length, sizeof (char));
-
-    strcpy(extensions[i], VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-
-    instance_create_info->ppEnabledExtensionNames = extensions;
-    instance_create_info->enabledExtensionCount = extension_count;
-}
-
+//TODO memoize, as this function might be called multiple times
 int _vulkan_physical_device_find_suitable_queue_family_index(
     VkPhysicalDevice physical_device, 
     VkQueueFlagBits queue_flag_bit
