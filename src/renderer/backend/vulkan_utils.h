@@ -7,6 +7,10 @@
 
 #define VKASSERT(x) ((bool)((x) == VK_SUCCESS))
 
+typedef struct queue_family_indices_t {
+    uint graphics;
+} queue_family_indices;
+
 extern const char *VALIDATION_LAYERS[];
 extern const int VALIDATION_LAYERS_COUNT;
 
@@ -24,9 +28,14 @@ int _vulkan_get_physical_device_suitability_score(
     VkPhysicalDevice physical_device
 );
 
-int _vulkan_physical_device_find_suitable_queue_family_index(
+int _vulkan_physical_device_find_queue_family_index(
     VkPhysicalDevice physical_device,
     VkQueueFlagBits queue_flag_bit
+);
+
+bool _vulkan_physical_device_fill_queue_family_indices(
+    VkPhysicalDevice physical_device,
+    queue_family_indices *queue_family_indices
 );
 
 // Vulkan debug callback

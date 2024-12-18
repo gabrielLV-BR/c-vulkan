@@ -10,15 +10,15 @@
 
 #include <vulkan/vulkan.h>
 
+const int VALIDATION_LAYERS_COUNT = 1;
 const char *VALIDATION_LAYERS[] = { 
     "VK_LAYER_KHRONOS_validation"
 };
-const int VALIDATION_LAYERS_COUNT = 1;
 
+const int QUEUE_FAMILIES_COUNT = 1;
 const VkQueueFlagBits QUEUE_FAMILIES[] = {
     VK_QUEUE_GRAPHICS_BIT
 };
-const int QUEUE_FAMILIES_COUNT = 1;
 
 void _vulkan_print_extensions() {
     int i;
@@ -121,7 +121,7 @@ bool _vulkan_check_validation_layers() {
 }
 
 //TODO memoize, as this function might be called multiple times
-int _vulkan_physical_device_find_suitable_queue_family_index(
+int _vulkan_physical_device_find_queue_family_index(
     VkPhysicalDevice physical_device, 
     VkQueueFlagBits queue_flag_bit
 ) {
@@ -159,7 +159,7 @@ int _vulkan_get_physical_device_suitability_score(VkPhysicalDevice physical_devi
     vkGetPhysicalDeviceFeatures(physical_device, &features);
 
     graphics_family_index = 
-        _vulkan_physical_device_find_suitable_queue_family_index(
+        _vulkan_physical_device_find_queue_family_index(
             physical_device,
             VK_QUEUE_GRAPHICS_BIT
         );
@@ -176,6 +176,22 @@ int _vulkan_get_physical_device_suitability_score(VkPhysicalDevice physical_devi
     DEBUG("Device %s scored %d\n", properties.deviceName, score);
 
     return score;
+}
+
+bool _vulkan_physical_device_fill_queue_family_indices(
+    VkPhysicalDevice physical_device,
+    queue_family_indices *queue_family_indices
+) {
+    queue_family_indices->graphics = _vulkan_physical_device_find_queue_family_index(
+        physical_device, VK_QUEUE_GRAPHICS_BIT
+    );
+
+    if (queue_family_indices->graphics == -1) {
+        ERROR("Error finding GRAPHICS queue family index");
+        return false;
+    }
+
+    return true;
 }
 
 // debug callback

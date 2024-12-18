@@ -24,7 +24,7 @@ bool __vulkan_backend_create_logical_device(
     queue_create_infos = calloc(sizeof (VkDeviceQueueCreateInfo), QUEUE_FAMILIES_COUNT);
 
     for (int i = 0; i < QUEUE_FAMILIES_COUNT; i++) {
-        int queue_index = _vulkan_physical_device_find_suitable_queue_family_index(
+        int queue_index = _vulkan_physical_device_find_queue_family_index(
             physical_device,
             QUEUE_FAMILIES[i]
         );
